@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Marca - Leonova Estudio</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&family=Roboto+Mono:wght@300;400;500&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Lora', serif;
+            background: linear-gradient(135deg, #1C1C1C 0%, #8A8A8A 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        /* DISEÑO DESKTOP - LIBRO 3D */
+        .desktop-view {
+            display: block;
+        }
+        
+        .mobile-view {
+            display: none;
+        }
+        
+        .book-container {
+            perspective: 2000px;
+            width: 1200px;
+            height: 800px;
+            position: relative;
+        }
+        
+        .book {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s ease-in-out;
+        }
+        
+        .book.closed {
+            transform: rotateY(-15deg);
+        }
+        
+        .book.open {
+            transform: rotateY(0deg);
+        }
+        
+        .book.closed .page:not([data-page="0"]) {
+            display: none;
+        }
+        
+        .book.closed .page[data-page="0"] {
+            transform: rotateY(0deg);
+            display: flex;
+        }
+        
+        .page {
+            width: 50%;
+            height: 100%;
+            position: absolute;
+            background: #F5F5F5;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(200, 167, 93, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(217, 127, 102, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(28, 28, 28, 0.01) 0%, transparent 50%),
+                linear-gradient(135deg, transparent 0%, rgba(200, 167, 93, 0.005) 50%, transparent 100%);
+            border-radius: 0 15px 15px 0;
+            box-shadow: 0 10px 30px rgba(28, 28, 28, 0.4);
+            transform-origin: left center;
+            transition: transform 0.8s ease-in-out, opacity 0.6s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .page.left {
+            left: 0;
+            border-radius: 15px 0 0 15px;
+            transform-origin: right center;
+        }
+        
+        .page.right {
+            right: 0;
+        }
+        
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
+        
+        /* DISEÑO MÓVIL - SCROLL VERTICAL */
+        .mobile-container {
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            background: #F5F5F5;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(28, 28, 28, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .mobile-pages {
+            height: 100%;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        
+        .mobile-page {
+            min-height: 100%;
+            padding: 30px 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            border-bottom: 1px solid rgba(200, 167, 93, 0.2);
+            background: #F5F5F5;
+        }
+        
+        .mobile-page.cover {
+            background: linear-gradient(135deg, #1C1C1C 0%, #000000 100%);
+            color: #F5F5F5;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .mobile-navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+            background: rgba(245, 245, 245, 0.95);
+            padding: 10px 15px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(28, 28, 28, 0.2);
+        }
+        
+        .mobile-nav-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid #C8A75D;
+            border-radius: 15px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            color: #1C1C1C;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-nav-btn:hover, .mobile-nav-btn.active {
+            background: #C8A75D;
+            color: #1C1C1C;
+        }
+        
+        /* CONTENIDO COMPARTIDO */
+        .page-content {
+            padding: 50px 40px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            overflow-y: auto;
+        }
+        
+        .page-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 35px,
+                    rgba(200, 167, 93, 0.008) 35px,
+                    rgba(200, 167, 93, 0.008) 36px
+                ),
+                repeating-linear-gradient(
+                    -45deg,
+                    transparent,
+                    transparent 35px,
+                    rgba(217, 127, 102, 0.006) 35px,
+                    rgba(217, 127, 102, 0.006) 36px
+                );
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .page-content > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cover {
+            background: linear-gradient(135deg, #1C1C1C 0%, #000000 100%);
+            color: #F5F5F5;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .click-to-open {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(200, 167, 93, 0.95);
+            color: #1C1C1C;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 8px 25px rgba(200, 167, 93, 0.4);
+            animation: pulse 2s infinite;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            border: 2px solid rgba(245, 245, 245, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .click-to-open:hover {
+            background: #C8A75D;
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 10px 30px rgba(200, 167, 93, 0.6);
+        }
+        
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .cover h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+            color: #C8A75D;
+        }
+        
+        .cover .subtitle {
+            font-family: 'Lora', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            font-style: italic;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            color: #F5F5F5;
+        }
+        
+        .cover .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(200, 167, 93, 0.3);
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        
+        .cover .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .cover .logo-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #C8A75D, #D97F66);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1C1C1C;
+        }
+        
+        .page h2, .mobile-page h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.2rem;
+            color: #1C1C1C;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        
+        .page h3, .mobile-page h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5rem;
+            color: #C8A75D;
+            margin-bottom: 15px;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+        
+        .page p, .mobile-page p {
+            font-family: 'Lora', serif;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #8A8A8A;
+            margin-bottom: 18px;
+        }
+        
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .color-item {
+            text-align: center;
+        }
+        
+        .color-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+            box-shadow: 0 4px 15px rgba(28, 28, 28, 0.2);
+        }
+        
+        .color-name {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            color: #1C1C1C;
+            margin-bottom: 3px;
+            font-size: 0.9rem;
+        }
+        
+        .color-code {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.8rem;
+            color: #8A8A8A;
+        }
+        
+        .typography-sample {
+            margin: 25px 0;
+        }
+        
+        .font-display {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1C1C1C;
+            margin-bottom: 8px;
+        }
+        
+        .font-regular {
+            font-family: 'Lora', serif;
+            font-size: 1.1rem;
+            color: #8A8A8A;
+            margin-bottom: 8px;
+        }
+        
+        .font-mono {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.95rem;
+            color: #8A8A8A;
+        }
+        
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        
+        .navigation.hidden {
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+        }
+        
+        .nav-btn {
+            padding: 12px 24px;
+            background: rgba(245, 245, 245, 0.95);
+            border: 2px solid #C8A75D;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            color: #1C1C1C;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(28, 28, 28, 0.1);
+        }
+        
+        .nav-btn:hover {
+            background: #C8A75D;
+            color: #1C1C1C;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(200, 167, 93, 0.3);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #8A8A8A;
+        }
+        
+        .page-number {
+            position: absolute;
+            bottom: 25px;
+            right: 30px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9rem;
+            color: #C8A75D;
+            font-weight: 500;
+        }
+        
+        .logo-showcase {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+        }
+        
+        .logo-main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        
+        .logo-main-img {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(200, 167, 93, 0.4);
+        }
+        
+        .logo-main {
+            width: 180px;
+            height: 180px;
+            background: linear-gradient(135deg, #C8A75D, #D97F66);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #1C1C1C;
+            box-shadow: 0 10px 30px rgba(200, 167, 93, 0.4);
+        }
+        
+        .usage-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .usage-item {
+            padding: 20px;
+            background: #F5F5F5;
+            border-radius: 12px;
+            border-left: 4px solid #C8A75D;
+            box-shadow: 0 2px 10px rgba(28, 28, 28, 0.05);
+        }
+        
+        .usage-item h4 {
+            font-family: 'Montserrat', sans-serif;
+            color: #1C1C1C;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .usage-item p {
+            font-family: 'Lora', serif;
+            font-size: 0.85rem;
+            margin: 0;
+            color: #8A8A8A;
+            line-height: 1.5;
+        }
+        
+        .emotional-section {
+            background: linear-gradient(135deg, #D97F66, rgba(217, 127, 102, 0.1));
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            color: #F5F5F5;
+        }
+        
+        .emotional-section h3 {
+            color: #F5F5F5;
+            margin-top: 0;
+        }
+        
+        .emotional-section p {
+            color: #F5F5F5;
+            opacity: 0.95;
+            font-style: italic;
+        }
+        
+        .quote-section {
+            background: #1C1C1C;
+            color: #C8A75D;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .quote-section p {
+            font-family: 'Lora', serif;
+            font-size: 1.3rem;
+            font-style: italic;
+            color: #C8A75D;
+            margin: 0;
+        }
+        
+        .values-list {
+            background: rgba(200, 167, 93, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+        
+        .message-key {
+            background: rgba(217, 127, 102, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #D97F66;
+        }
+        
+        .message-key p {
+            margin: 0;
+            font-style: italic;
+            color: #1C1C1C;
+        }
+        
+        /* RESPONSIVE BREAKPOINTS */
+        @media (max-width: 1300px) {
+            .book-container {
+                width: 1000px;
+                height: 700px;
+            }
+        }
+        
+        @media (max-width: 1100px) {
+            .book-container {
+                width: 900px;
+                height: 600px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .desktop-view {
+                display: none;
+            }
+            
+            .mobile-view {
+                display: block;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .cover h1 {
+                font-size: 2.5rem;
+            }
+            
+            .mobile-page h2 {
+                font-size: 1.8rem;
+            }
+            
+            .color-palette {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .usage-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .logo-main, .logo-main-img {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .font-display {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- VERSIÓN DESKTOP -->
+    <div class="desktop-view">
+        <div class="book-container">
+            <div class="book" id="book">
+                <!-- Portada -->
+                <div class="page cover" data-page="0" onclick="openBook()">
+                    <div class="page-content">
+                        <div class="logo">
+                            <img src="leonova-logo2.png" alt="Leonova Estudio Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="logo-placeholder" style="display: flex;">LS</div>
+                        </div>
+                        <h1>LEONOVA<br>ESTUDIO</h1>
+                        <div class="subtitle">Manual de Identidad de Marca</div>
+                        <p style="margin-top: 40px; font-size: 1rem; color: #C8A75D; font-family: 'Roboto Mono', monospace;">Versión 1.0 • Creado por JDanielC</p>
+                    </div>
+                    <div class="click-to-open" id="clickToOpen">
+                        📖 Haz clic para abrir
+                    </div>
+                </div>
+                
+                <!-- Página 1: Introducción -->
+                <div class="page" data-page="1">
+                    <div class="page-content">
+                        <h2>¿Qué es Leonova Estudio?</h2>
+                        <p>Leonova Estudio nace del deseo de transformar ideas en experiencias tangibles. Somos un espacio creativo donde el diseño gráfico, la estrategia digital y la producción física se fusionan para contar historias con impacto.</p>
+                        
+                        <div class="emotional-section">
+                            <h3>Nuestra Esencia</h3>
+                            <p>"Diseño con alma, entrega con precisión. Tu marca merece ser sentida, no solo vista."</p>
+                        </div>
+                        
+                        <h3>Visión</h3>
+                        <p>Ser un referente en diseño emocional y producción visual en Trinidad y Tobago y más allá, empoderando marcas con identidad auténtica y presencia memorable.</p>
+                        
+                        <h3>Misión</h3>
+                        <p>Diseñar con intención, producir con precisión y comunicar con alma. Leonova Estudio acompaña a cada cliente desde el concepto hasta la entrega.</p>
+                    </div>
+                    <div class="page-number">01</div>
+                </div>
+                
+                <!-- Página 2: Valores e Identidad Verbal -->
+                <div class="page" data-page="2">
+                    <div class="page-content">
+                        <h2>Valores & Identidad Verbal</h2>
+                        
+                        <div class="values-list">
+                            <h3>Nuestros Valores</h3>
+                            <p>🎯 <strong>Intencionalidad</strong> - Cada decisión tiene propósito<br>
+                            💡 <strong>Creatividad</strong> - Innovación sin límites<br>
+                            🤝 <strong>Empatía</strong> - Conexión auténtica<br>
+                            🛠️ <strong>Excelencia técnica</strong> - Precisión en cada detalle<br>
+                            🌍 <strong>Conexión global</strong> - Impacto sin fronteras</p>
+                        </div>
+                        
+                        <h3>Tono de Voz</h3>
+                        <p><strong>Inspiradora</strong> • <strong>Técnica-emocional</strong> • <strong>Cercana</strong> • <strong>Afirmativa</strong></p>
+                        
+                        <h3>Mensajes Clave</h3>
+                        <div class="message-key">
+                            <p>"Creamos lo que otros solo imaginan."</p>
+                        </div>
+                        <div class="message-key">
+                            <p>"Desde el concepto hasta el corte: cada detalle importa."</p>
+                        </div>
+                        <div class="message-key">
+                            <p>"Leonova: donde la técnica se encuentra con la emoción."</p>
+                        </div>
+                    </div>
+                    <div class="page-number">02</div>
+                </div>
+                
+                <!-- Página 3: Logotipo -->
+                <div class="page" data-page="3">
+                    <div class="page-content">
+                        <h2>Logotipo</h2>
+                        <p><strong>Leonova</strong> evoca fuerza (leo), visión (nova), y evolución constante. Es memorable, internacional y adaptable a múltiples plataformas.</p>
+                        <p style="font-family: 'Roboto Mono', monospace; color: #C8A75D;">Pronunciación: /le-o-NO-va/</p>
+                        
+                        <div class="logo-showcase">
+                            <div class="logo-main-container">
+                                <img src="leonova-logo.png" alt="Leonova Estudio Logo Principal" class="logo-main-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="logo-main" style="display: flex;">LS</div>
+                            </div>
+                        </div>
+                        
+                        <h3>Construcción</h3>
+                        <p>El diseño utiliza el gradiente dorado-terracota que simboliza la sofisticación premium con calidez emocional, creando conexión humana auténtica.</p>
+                        
+                        <div class="usage-grid">
+                            <div class="usage-item">
+                                <h4>✓ Usos Correctos</h4>
+                                <p>Proporción original, colores oficiales, fondos neutros con contraste adecuado</p>
+                            </div>
+                            <div class="usage-item">
+                                <h4>✗ Usos Incorrectos</h4>
+                                <p>Distorsión, cambio de colores no autorizados, baja legibilidad</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-number">03</div>
+                </div>
+                
+                <!-- Página 4: Colores -->
+                <div class="page" data-page="4">
+                    <div class="page-content">
+                        <h2>Paleta de Colores</h2>
+                        <p>Nuestra paleta cromática equilibra elegancia, sofisticación y calidez emocional, creando una identidad visual cohesiva y memorable.</p>
+                        
+                        <div class="color-palette">
+                            <div class="color-item">
+                                <div class="color-circle" style="background: #1C1C1C;"></div>
+                                <div class="color-name">Negro Profundo</div>
+                                <div class="color-code">#1C1C1C</div>
+                            </div>
+                            <div class="color-item">
+                                <div class="color-circle" style="background: #8A8A8A;"></div>
+                                <div class="color-name">Gris Técnico</div>
+                                <div class="color-code">#8A8A8A</div>
+                            </div>
+                            <div class="color-item">
+                                <div class="color-circle" style="background: #C8A75D;"></div>
+                                <div class="color-name">Dorado Cálido</div>
+                                <div class="color-code">#C8A75D</div>
+                            </div>
+                            <div class="color-item">
+                                <div class="color-circle" style="background: #D97F66;"></div>
+                                <div class="color-name">Terracota Suave</div>
+                                <div class="color-code">#D97F66</div>
+                            </div>
+                            <div class="color-item">
+                                <div class="color-circle" style="background: #F5F5F5;"></div>
+                                <div class="color-name">Blanco Humo</div>
+                                <div class="color-code">#F5F5F5</div>
+                            </div>
+                        </div>
+                        
+                        <h3>Emociones y Usos</h3>
+                        <p><strong>Negro:</strong> Elegancia, contraste editorial<br>
+                        <strong>Gris:</strong> Jerarquía, equilibrio visual<br>
+                        <strong>Dorado:</strong> Sofisticación, acento premium<br>
+                        <strong>Terracota:</strong> Calidez emocional, conexión humana<br>
+                        <strong>Blanco Humo:</strong> Limpieza, espacio editorial</p>
+                    </div>
+                    <div class="page-number">04</div>
+                </div>
+                
+                <!-- Página 5: Tipografía -->
+                <div class="page" data-page="5">
+                    <div class="page-content">
+                        <h2>Tipografía</h2>
+                        <p>Nuestro sistema tipográfico combina la fuerza de Montserrat, la elegancia de Lora y la precisión técnica de Roboto Mono.</p>
+                        
+                        <div class="typography-sample">
+                            <div class="font-display">Montserrat Bold</div>
+                            <div class="font-regular">Lora Regular - Para textos principales y contenido editorial</div>
+                            <div class="font-mono">Roboto Mono - Para información técnica y códigos</div>
+                        </div>
+                        
+                        <h3>Jerarquía Tipográfica</h3>
+                        <div class="usage-grid">
+                            <div class="usage-item">
+                                <h4>Títulos Principales</h4>
+                                <p>Montserrat Bold, 28-36pt<br>Color: Negro profundo o Dorado cálido</p>
+                            </div>
+                            <div class="usage-item">
+                                <h4>Subtítulos</h4>
+                                <p>Montserrat Medium, 18-24pt<br>Color: Dorado cálido para jerarquía</p>
+                            </div>
+                            <div class="usage-item">
+                                <h4>Texto Cuerpo</h4>
+                                <p>Lora Regular, 12-16pt<br>Color: Gris técnico para equilibrio</p>
+                            </div>
+                            <div class="usage-item">
+                                <h4>Texto Técnico</h4>
+                                <p>Roboto Mono, 10-12pt<br>Para códigos, especificaciones</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-number">05</div>
+                </div>
+                
+                <!-- Página 6: Aplicaciones -->
+                <div class="page" data-page="6">
+                    <div class="page-content">
+                        <h2>Aplicaciones de Marca</h2>
+                        <p>Directrices para el uso correcto de nuestra identidad visual en todos los puntos de contacto con nuestros clientes.</p>
+                        
+                        <h3>Material Físico</h3>
+                        <div class="usage-grid">
+                            <div class="usage-item">
+                                <h4>Tarjetas de Presentación</h4>
+                                <p>Papel mate con detalles dorados, frase clave en terracota suave</p>
+                            </div>
+                            <div class="usage-item">
+                                <h4>Packaging & Etiquetas</h4>
+                                <p>Stickers con isotipo dorado, tipografía clara y detalles técnicos</p>
+                            </div>
+                            <div class="usage-item">
+                                <h4>Señalética & Vinilos</h4>
+                                <p>Corte de vinil dorado sobre acrílico, frases clave en tipografía grande</p>
+                            </div>
+                            <div class="usage-item">
+                                <h4>Presentaciones</h4>
+                                <p>Portadas con logotipo + frase clave, retícula editorial clara</p>
+                            </div>
+                        </div>
+                        
+                        <h3>Especificaciones Técnicas</h3>
+                        <p><strong>Formatos:</strong> PDF/X, SVG, PNG<br>
+                        <strong>Resolución:</strong> 300 dpi impresión, 72 dpi web<br>
+                        <strong>Materiales:</strong> Papel mate, vinil premium, acrílico</p>
+                    </div>
+                    <div class="page-number">06</div>
+                </div>
+                
+                <!-- Página 7: Digital -->
+                <div class="page" data-page="7">
+                    <div class="page-content">
+                        <h2>Lenguaje Digital</h2>
+                        <p>Nuestra presencia digital mantiene la coherencia visual y emocional en todos los canales, desde el sitio web hasta las redes sociales.</p>
+                        
+                        <h3>Estructura Web</h3>
+                        <div class="usage-grid">
+                            <div class="usage-item">
+                                <h4>Inicio</h4>
+                                <p>Frase afirmativa + llamada a la acción clara y directa</p>
+                            </div>
+                            <div class="usage-item">
+                                <h4>Servicios</h4>
+                                <p>Diseño, branding, producción con ejemplos visuales</p>
+                            </div>
+                            <div class="usage-item">
+                                <h4>Portafolio</h4>
+                                <p>Carruseles interactivos, testimonios, casos de éxito</p>
+                            </div>
+                            <div class="usage-item">
+                                <h4>Contacto</h4>
+                                <p>Formulario, WhatsApp, redes sociales integradas</p>
+                            </div>
+                        </div>
+                        
+                        <h3>Redes Sociales</h3>
+                        <p>Plantillas modulares para Instagram, TikTok, WhatsApp con frases afirmativas, testimonios y avances de proyectos.</p>
+                        
+                        <h3>Estilo Visual Digital</h3>
+                        <p>Íconos minimalistas, transiciones suaves, tono afirmativo y cercano, manteniendo siempre nuestra paleta cromática.</p>
+                    </div>
+                    <div class="page-number">07</div>
+                </div>
+                
+                <!-- Contraportada -->
+                <div class="page cover" data-page="8">
+                    <div class="page-content">
+                        <div class="logo">
+                            <img src="TU_LOGO_AQUI.png" alt="Leonova Estudio Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="logo-placeholder" style="display: flex;">LS</div>
+                        </div>
+                        
+                        <div class="quote-section">
+                            <p>"Creamos lo que otros solo imaginan."</p>
+                        </div>
+                        
+                        <h2 style="color: #C8A75D; margin-bottom: 20px;">Cierre Emocional</h2>
+                        <p style="font-size: 1.1rem; margin-bottom: 30px;">Leonova Estudio no es solo una marca: es una experiencia que transforma ideas en presencia. Este manual es tu constelación creativa, tu carta de navegación, tu afirmación profesional.</p>
+                        
+                        <div style="border-top: 1px solid rgba(200, 167, 93, 0.3); padding-top: 25px; margin-top: 30px;">
+                            <p style="margin-bottom: 8px; color: #C8A75D; font-family: 'Montserrat', sans-serif;"><strong>Leonova Estudio</strong></p>
+                            <p style="font-size: 0.9rem; opacity: 0.8;">leo-contact@leonovastudio.shop</p>
+                            <p style="font-size: 0.9rem; opacity: 0.8;">www.leonovastudio.shop</p>
+                            <p style="font-size: 0.85rem; opacity: 0.6; margin-top: 15px; color: #8A8A8A; font-family: 'Roboto Mono', monospace;">© 2025 Leonova Estudio • Trinidad y Tobago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="previousPage()">← Anterior</button>
+            <button class="nav-btn" id="nextBtn" onclick="nextPage()">Siguiente →</button>
+        </div>
+    </div>
+    
+    <!-- VERSIÓN MÓVIL -->
+    <div class="mobile-view">
+        <div class="mobile-container">
+            <div class="mobile-pages" id="mobilePages">
+                <!-- Portada Móvil -->
+                <div class="mobile-page cover">
+                    <div class="logo">
+                        <img src="TU_LOGO_AQUI.png" alt="Leonova Estudio Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="logo-placeholder" style="display: flex;">LS</div>
+                    </div>
+                    <h1>LEONOVA<br>ESTUDIO</h1>
+                    <div class="subtitle">Manual de Identidad de Marca</div>
+                    <p style="margin-top: 40px; font-size: 0.9rem; color: #C8A75D; font-family: 'Roboto Mono', monospace;">Versión 1.0 • Creado por JDanielC</p>
+                    <p style="margin-top: 30px; font-size: 0.9rem; color: #C8A75D;">📱 Desliza hacia abajo para explorar</p>
+                </div>
+                
+                <!-- Página 1 Móvil -->
+                <div class="mobile-page">
+                    <h2>¿Qué es Leonova Estudio?</h2>
+                    <p>Leonova Estudio nace del deseo de transformar ideas en experiencias tangibles. Somos un espacio creativo donde el diseño gráfico, la estrategia digital y la producción física se fusionan para contar historias con impacto.</p>
+                    
+                    <div class="emotional-section">
+                        <h3>Nuestra Esencia</h3>
+                        <p>"Diseño con alma, entrega con precisión. Tu marca merece ser sentida, no solo vista."</p>
+                    </div>
+                    
+                    <h3>Visión</h3>
+                    <p>Ser un referente en diseño emocional y producción visual en Trinidad y Tobago y más allá, empoderando marcas con identidad auténtica y presencia memorable.</p>
+                    
+                    <h3>Misión</h3>
+                    <p>Diseñar con intención, producir con precisión y comunicar con alma. Leonova Estudio acompaña a cada cliente desde el concepto hasta la entrega.</p>
+                </div>
+                
+                <!-- Página 2 Móvil -->
+                <div class="mobile-page">
+                    <h2>Valores & Identidad Verbal</h2>
+                    
+                    <div class="values-list">
+                        <h3>Nuestros Valores</h3>
+                        <p>🎯 <strong>Intencionalidad</strong> - Cada decisión tiene propósito<br>
+                        💡 <strong>Creatividad</strong> - Innovación sin límites<br>
+                        🤝 <strong>Empatía</strong> - Conexión auténtica<br>
+                        🛠️ <strong>Excelencia técnica</strong> - Precisión en cada detalle<br>
+                        🌍 <strong>Conexión global</strong> - Impacto sin fronteras</p>
+                    </div>
+                    
+                    <h3>Tono de Voz</h3>
+                    <p><strong>Inspiradora</strong> • <strong>Técnica-emocional</strong> • <strong>Cercana</strong> • <strong>Afirmativa</strong></p>
+                    
+                    <h3>Mensajes Clave</h3>
+                    <div class="message-key">
+                        <p>"Creamos lo que otros solo imaginan."</p>
+                    </div>
+                    <div class="message-key">
+                        <p>"Desde el concepto hasta el corte: cada detalle importa."</p>
+                    </div>
+                    <div class="message-key">
+                        <p>"Leonova: donde la técnica se encuentra con la emoción."</p>
+                    </div>
+                </div>
+                
+                <!-- Página 3 Móvil -->
+                <div class="mobile-page">
+                    <h2>Logotipo</h2>
+                    <p><strong>Leonova</strong> evoca fuerza (leo), visión (nova), y evolución constante. Es memorable, internacional y adaptable a múltiples plataformas.</p>
+                    <p style="font-family: 'Roboto Mono', monospace; color: #C8A75D;">Pronunciación: /le-o-NO-va/</p>
+                    
+                    <div class="logo-showcase">
+                        <div class="logo-main-container">
+                            <img src="TU_LOGO_AQUI.png" alt="Leonova Estudio Logo Principal" class="logo-main-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="logo-main" style="display: flex;">LS</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Construcción</h3>
+                    <p>El diseño utiliza el gradiente dorado-terracota que simboliza la sofisticación premium con calidez emocional, creando conexión humana auténtica.</p>
+                    
+                    <div class="usage-grid">
+                        <div class="usage-item">
+                            <h4>✓ Usos Correctos</h4>
+                            <p>Proporción original, colores oficiales, fondos neutros con contraste adecuado</p>
+                        </div>
+                        <div class="usage-item">
+                            <h4>✗ Usos Incorrectos</h4>
+                            <p>Distorsión, cambio de colores no autorizados, baja legibilidad</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Página 4 Móvil -->
+                <div class="mobile-page">
+                    <h2>Paleta de Colores</h2>
+                    <p>Nuestra paleta cromática equilibra elegancia, sofisticación y calidez emocional, creando una identidad visual cohesiva y memorable.</p>
+                    
+                    <div class="color-palette">
+                        <div class="color-item">
+                            <div class="color-circle" style="background: #1C1C1C;"></div>
+                            <div class="color-name">Negro Profundo</div>
+                            <div class="color-code">#1C1C1C</div>
+                        </div>
+                        <div class="color-item">
+                            <div class="color-circle" style="background: #8A8A8A;"></div>
+                            <div class="color-name">Gris Técnico</div>
+                            <div class="color-code">#8A8A8A</div>
+                        </div>
+                        <div class="color-item">
+                            <div class="color-circle" style="background: #C8A75D;"></div>
+                            <div class="color-name">Dorado Cálido</div>
+                            <div class="color-code">#C8A75D</div>
+                        </div>
+                        <div class="color-item">
+                            <div class="color-circle" style="background: #D97F66;"></div>
+                            <div class="color-name">Terracota Suave</div>
+                            <div class="color-code">#D97F66</div>
+                        </div>
+                        <div class="color-item">
+                            <div class="color-circle" style="background: #F5F5F5;"></div>
+                            <div class="color-name">Blanco Humo</div>
+                            <div class="color-code">#F5F5F5</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Emociones y Usos</h3>
+                    <p><strong>Negro:</strong> Elegancia, contraste editorial<br>
+                    <strong>Gris:</strong> Jerarquía, equilibrio visual<br>
+                    <strong>Dorado:</strong> Sofisticación, acento premium<br>
+                    <strong>Terracota:</strong> Calidez emocional, conexión humana<br>
+                    <strong>Blanco Humo:</strong> Limpieza, espacio editorial</p>
+                </div>
+                
+                <!-- Página 5 Móvil -->
+                <div class="mobile-page">
+                    <h2>Tipografía</h2>
+                    <p>Nuestro sistema tipográfico combina la fuerza de Montserrat, la elegancia de Lora y la precisión técnica de Roboto Mono.</p>
+                    
+                    <div class="typography-sample">
+                        <div class="font-display">Montserrat Bold</div>
+                        <div class="font-regular">Lora Regular - Para textos principales y contenido editorial</div>
+                        <div class="font-mono">Roboto Mono - Para información técnica y códigos</div>
+                    </div>
+                    
+                    <h3>Jerarquía Tipográfica</h3>
+                    <div class="usage-grid">
+                        <div class="usage-item">
+                            <h4>Títulos Principales</h4>
+                            <p>Montserrat Bold, 28-36pt<br>Color: Negro profundo o Dorado cálido</p>
+                        </div>
+                        <div class="usage-item">
+                            <h4>Subtítulos</h4>
+                            <p>Montserrat Medium, 18-24pt<br>Color: Dorado cálido para jerarquía</p>
+                        </div>
+                        <div class="usage-item">
+                            <h4>Texto Cuerpo</h4>
+                            <p>Lora Regular, 12-16pt<br>Color: Gris técnico para equilibrio</p>
+                        </div>
+                        <div class="usage-item">
+                            <h4>Texto Técnico</h4>
+                            <p>Roboto Mono, 10-12pt<br>Para códigos, especificaciones</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Página 6 Móvil -->
+                <div class="mobile-page">
+                    <h2>Aplicaciones de Marca</h2>
+                    <p>Directrices para el uso correcto de nuestra identidad visual en todos los puntos de contacto con nuestros clientes.</p>
+                    
+                    <h3>Material Físico</h3>
+                    <div class="usage-grid">
+                        <div class="usage-item">
+                            <h4>Tarjetas de Presentación</h4>
+                            <p>Papel mate con detalles dorados, frase clave en terracota suave</p>
+                        </div>
+                        <div class="usage-item">
+                            <h4>Packaging & Etiquetas</h4>
+                            <p>Stickers con isotipo dorado, tipografía clara y detalles técnicos</p>
+                        </div>
+                        <div class="usage-item">
+                            <h4>Señalética & Vinilos</h4>
+                            <p>Corte de vinil dorado sobre acrílico, frases clave en tipografía grande</p>
+                        </div>
+                        <div class="usage-item">
+                            <h4>Presentaciones</h4>
+                            <p>Portadas con logotipo + frase clave, retícula editorial clara</p>
+                        </div>
+                    </div>
+                    
+                    <h3>Especificaciones Técnicas</h3>
+                    <p><strong>Formatos:</strong> PDF/X, SVG, PNG<br>
+                    <strong>Resolución:</strong> 300 dpi impresión, 72 dpi web<br>
+                    <strong>Materiales:</strong> Papel mate, vinil premium, acrílico</p>
+                </div>
+                
+                <!-- Página 7 Móvil -->
+                <div class="mobile-page">
+                    <h2>Lenguaje Digital</h2>
+                    <p>Nuestra presencia digital mantiene la coherencia visual y emocional en todos los canales, desde el sitio web hasta las redes sociales.</p>
+                    
+                    <h3>Estructura Web</h3>
+                    <div class="usage-grid">
+                        <div class="usage-item">
+                            <h4>Inicio</h4>
+                            <p>Frase afirmativa + llamada a la acción clara y directa</p>
+                        </div>
+                        <div class="usage-item">
+                            <h4>Servicios</h4>
+                            <p>Diseño, branding, producción con ejemplos visuales</p>
+                        </div>
+                        <div class="usage-item">
+                            <h4>Portafolio</h4>
+                            <p>Carruseles interactivos, testimonios, casos de éxito</p>
+                        </div>
+                        <div class="usage-item">
+                            <h4>Contacto</h4>
+                            <p>Formulario, WhatsApp, redes sociales integradas</p>
+                        </div>
+                    </div>
+                    
+                    <h3>Redes Sociales</h3>
+                    <p>Plantillas modulares para Instagram, TikTok, WhatsApp con frases afirmativas, testimonios y avances de proyectos.</p>
+                    
+                    <h3>Estilo Visual Digital</h3>
+                    <p>Íconos minimalistas, transiciones suaves, tono afirmativo y cercano, manteniendo siempre nuestra paleta cromática.</p>
+                </div>
+                
+                <!-- Contraportada Móvil -->
+                <div class="mobile-page cover">
+                    <div class="logo">
+                        <img src="TU_LOGO_AQUI.png" alt="Leonova Estudio Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="logo-placeholder" style="display: flex;">LS</div>
+                    </div>
+                    
+                    <div class="quote-section">
+                        <p>"Creamos lo que otros solo imaginan."</p>
+                    </div>
+                    
+                    <h2 style="color: #C8A75D; margin-bottom: 20px;">Cierre Emocional</h2>
+                    <p style="font-size: 1rem; margin-bottom: 30px;">Leonova Estudio no es solo una marca: es una experiencia que transforma ideas en presencia. Este manual es tu constelación creativa, tu carta de navegación, tu afirmación profesional.</p>
+                    
+                    <div style="border-top: 1px solid rgba(200, 167, 93, 0.3); padding-top: 25px; margin-top: 30px;">
+                        <p style="margin-bottom: 8px; color: #C8A75D; font-family: 'Montserrat', sans-serif;"><strong>Leonova Estudio</strong></p>
+                        <p style="font-size: 0.85rem; opacity: 0.8;">leo-contact@leonovastudio.shop</p>
+                        <p style="font-size: 0.85rem; opacity: 0.8;">www.leonovastudio.shop</p>
+                        <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 15px; color: #8A8A8A; font-family: 'Roboto Mono', monospace;">© 2025 Leonova Estudio • Trinidad y Tobago</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mobile-navigation">
+            <button class="mobile-nav-btn" onclick="scrollToPage(0)">Inicio</button>
+            <button class="mobile-nav-btn" onclick="scrollToPage(1)">Intro</button>
+            <button class="mobile-nav-btn" onclick="scrollToPage(2)">Valores</button>
+            <button class="mobile-nav-btn" onclick="scrollToPage(3)">Logo</button>
+            <button class="mobile-nav-btn" onclick="scrollToPage(4)">Colores</button>
+            <button class="mobile-nav-btn" onclick="scrollToPage(5)">Tipo</button>
+            <button class="mobile-nav-btn" onclick="scrollToPage(6)">Apps</button>
+            <button class="mobile-nav-btn" onclick="scrollToPage(7)">Digital</button>
+            <button class="mobile-nav-btn" onclick="scrollToPage(8)">Final</button>
+        </div>
+    </div>
+    
+    <script>
+        let currentView = 0;
+        const totalViews = 5;
+        let bookOpened = false;
+        let isAnimating = false;
+        
+        // Detectar si es móvil
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+        
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!isMobile()) {
+                const book = document.getElementById('book');
+                const navigation = document.querySelector('.navigation');
+                book.classList.add('closed');
+                navigation.classList.add('hidden');
+                showView(0);
+            } else {
+                // En móvil, activar el primer botón
+                updateMobileNavigation(0);
+            }
+        });
+        
+        // FUNCIONES DESKTOP
+        function showView(viewIndex) {
+            const pages = document.querySelectorAll('.page');
+            
+            pages.forEach(page => {
+                const pageNum = parseInt(page.getAttribute('data-page'));
+                page.style.display = 'none';
+                page.style.transform = 'rotateY(0deg)';
+                page.style.zIndex = 1;
+                page.style.opacity = '1';
+            });
+            
+            if (viewIndex === 0) {
+                const portada = document.querySelector('[data-page="0"]');
+                portada.style.display = 'flex';
+                portada.style.left = '25%';
+                portada.style.width = '50%';
+                portada.style.zIndex = 100;
+            } else if (viewIndex === 1) {
+                const page1 = document.querySelector('[data-page="1"]');
+                const page2 = document.querySelector('[data-page="2"]');
+                page1.style.display = 'flex';
+                page1.style.left = '0';
+                page1.style.width = '50%';
+                page1.style.zIndex = 100;
+                page2.style.display = 'flex';
+                page2.style.right = '0';
+                page2.style.width = '50%';
+                page2.style.zIndex = 100;
+            } else if (viewIndex === 2) {
+                const page3 = document.querySelector('[data-page="3"]');
+                const page4 = document.querySelector('[data-page="4"]');
+                page3.style.display = 'flex';
+                page3.style.left = '0';
+                page3.style.width = '50%';
+                page3.style.zIndex = 100;
+                page4.style.display = 'flex';
+                page4.style.right = '0';
+                page4.style.width = '50%';
+                page4.style.zIndex = 100;
+            } else if (viewIndex === 3) {
+                const page5 = document.querySelector('[data-page="5"]');
+                const page6 = document.querySelector('[data-page="6"]');
+                page5.style.display = 'flex';
+                page5.style.left = '0';
+                page5.style.width = '50%';
+                page5.style.zIndex = 100;
+                page6.style.display = 'flex';
+                page6.style.right = '0';
+                page6.style.width = '50%';
+                page6.style.zIndex = 100;
+            } else if (viewIndex === 4) {
+                const page7 = document.querySelector('[data-page="7"]');
+                page7.style.display = 'flex';
+                page7.style.left = '25%';
+                page7.style.width = '50%';
+                page7.style.zIndex = 100;
+            } else if (viewIndex === 5) {
+                const contraportada = document.querySelector('[data-page="8"]');
+                contraportada.style.display = 'flex';
+                contraportada.style.left = '25%';
+                contraportada.style.width = '50%';
+                contraportada.style.zIndex = 100;
+            }
+        }
+        
+        function animatePageFlip(direction) {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const pages = document.querySelectorAll('.page');
+            
+            if (direction === 'forward') {
+                pages.forEach(page => {
+                    if (page.style.display === 'flex') {
+                        page.style.transform = 'rotateY(-180deg)';
+                        page.style.opacity = '0.3';
+                    }
+                });
+            } else {
+                pages.forEach(page => {
+                    if (page.style.display === 'flex') {
+                        page.style.transform = 'rotateY(180deg)';
+                        page.style.opacity = '0.3';
+                    }
+                });
+            }
+            
+            setTimeout(() => {
+                isAnimating = false;
+            }, 800);
+        }
+        
+        function openBook() {
+            if (!bookOpened) {
+                const book = document.getElementById('book');
+                const navigation = document.querySelector('.navigation');
+                const clickToOpen = document.getElementById('clickToOpen');
+                
+                book.classList.remove('closed');
+                book.classList.add('open');
+                navigation.classList.remove('hidden');
+                clickToOpen.style.display = 'none';
+                bookOpened = true;
+                currentView = 1;
+                
+                showView(currentView);
+                updateNavigation();
+            }
+        }
+        
+        function updateNavigation() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.disabled = currentView === 1;
+            
+            if (currentView === 5) {
+                nextBtn.textContent = 'Cerrar Libro';
+                nextBtn.disabled = false;
+            } else {
+                nextBtn.textContent = 'Siguiente →';
+                nextBtn.disabled = false;
+            }
+        }
+        
+        function nextPage() {
+            if (isAnimating) return;
+            
+            if (currentView === 5) {
+                closeBook();
+            } else if (bookOpened && currentView < totalViews) {
+                animatePageFlip('forward');
+                setTimeout(() => {
+                    currentView++;
+                    showView(currentView);
+                    updateNavigation();
+                }, 400);
+            }
+        }
+        
+        function previousPage() {
+            if (isAnimating) return;
+            
+            if (bookOpened && currentView > 1) {
+                animatePageFlip('backward');
+                setTimeout(() => {
+                    currentView--;
+                    showView(currentView);
+                    updateNavigation();
+                }, 400);
+            }
+        }
+        
+        function closeBook() {
+            currentView = 0;
+            bookOpened = false;
+            const book = document.getElementById('book');
+            const navigation = document.querySelector('.navigation');
+            const clickToOpen = document.getElementById('clickToOpen');
+            
+            book.classList.add('closed');
+            book.classList.remove('open');
+            navigation.classList.add('hidden');
+            clickToOpen.style.display = 'block';
+            
+            showView(0);
+            updateNavigation();
+        }
+        
+        // FUNCIONES MÓVIL
+        function scrollToPage(pageIndex) {
+            const mobilePages = document.getElementById('mobilePages');
+            const pages = document.querySelectorAll('.mobile-page');
+            
+            if (pages[pageIndex]) {
+                pages[pageIndex].scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                updateMobileNavigation(pageIndex);
+            }
+        }
+        
+        function updateMobileNavigation(activeIndex) {
+            const buttons = document.querySelectorAll('.mobile-nav-btn');
+            buttons.forEach((btn, index) => {
+                if (index === activeIndex) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+        
+        // Detectar scroll en móvil para actualizar navegación
+        if (isMobile()) {
+            const mobilePages = document.getElementById('mobilePages');
+            let scrollTimeout;
+            
+            mobilePages.addEventListener('scroll', function() {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    const pages = document.querySelectorAll('.mobile-page');
+                    const scrollTop = mobilePages.scrollTop;
+                    const containerHeight = mobilePages.clientHeight;
+                    
+                    pages.forEach((page, index) => {
+                        const pageTop = page.offsetTop;
+                        const pageHeight = page.offsetHeight;
+                        
+                        if (scrollTop >= pageTop - containerHeight/2 && 
+                            scrollTop < pageTop + pageHeight - containerHeight/2) {
+                            updateMobileNavigation(index);
+                        }
+                    });
+                }, 100);
+            });
+        }
+        
+        // Navegación con teclado (solo desktop)
+        document.addEventListener('keydown', function(e) {
+            if (!isMobile()) {
+                if (!bookOpened && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    openBook();
+                } else if (bookOpened) {
+                    if (e.key === 'ArrowRight' || e.key === ' ') {
+                        e.preventDefault();
+                        nextPage();
+                    } else if (e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        previousPage();
+                    }
+                }
+            }
+        });
+        
+        // Redimensionar ventana
+        window.addEventListener('resize', function() {
+            location.reload(); // Recargar para cambiar entre versiones
+        });
+        
+        // Inicializar navegación
+        if (!isMobile()) {
+            updateNavigation();
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'977eed90c441147d',t:'MTc1NjY2ODQ3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
